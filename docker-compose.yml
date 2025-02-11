@@ -1,0 +1,29 @@
+services:
+  comment-service:
+    build: .
+    container_name: comment-service
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://comment-db/comments
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    networks:
+      - backend
+    depends_on:
+      - comment-db
+
+  comment-db:
+    image: postgres:latest
+    container_name: comment-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=comments
+    networks:
+      - backend
+
+networks:
+  backend:
