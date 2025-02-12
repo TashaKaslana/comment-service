@@ -29,6 +29,11 @@ public class CommentMentionEntity extends BaseEntity {
     @JoinColumn(name = "comment_id", referencedColumnName = "id", nullable = false, updatable = false)
     private CommentEntity comment;
 
-    @Column(name = "mention_user_id", nullable = false, updatable = false)
-    private UUID mentionUserId;
+    @Column(name = "mention_username", nullable = false)
+    private String mentionUserId;
+
+    public CommentMentionEntity(UUID commentId, String mentionUserId) {
+        this.commentId = commentId;
+        this.mentionUserId = mentionUserId;
+    }
 }
