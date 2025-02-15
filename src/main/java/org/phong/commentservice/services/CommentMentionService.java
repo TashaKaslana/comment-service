@@ -24,6 +24,7 @@ public class CommentMentionService {
     private List<String> extractMentions(String commentText) {
         List<String> userMentions = new ArrayList<>();
         String[] words = commentText.split("\\s+");
+
         for (String word : words) {
             if (MENTION_PATTERN.matcher(word).matches()) {
                 userMentions.add(word.substring(1));
@@ -38,8 +39,31 @@ public class CommentMentionService {
 
         List<String> userMentions = extractMentions(commentText);
 
-        for (String userMention : userMentions) {
-            commentMentionRepository.save(new CommentMentionEntity(commentId, userMention));
-        }
+        List<CommentMentionEntity> entityList = userMentions.stream()
+                .map(mentionUsername -> new CommentMentionEntity(commentId, mentionUsername))
+                .toList();
+
+        commentMentionRepository.saveAll(entityList);
+    }
+
+    public void deleteAllMentionById(List<UUID> commentIds) {
+        commentMentionRepository.deleteAllById(commentIds);
+    }
+
+    public void updateMentions(UUID commentId, String content) {
+        List<String> currentMentions = commentMentionRepository.findAllByCommentId(commentId);
+        List<String> newMentions = extractMentions(content);
+
+        List<String> mentionIdsToDelete = currentMentions.stream()
+                .filter(mention -> !newMentions.contains(mention))
+                .toList();
+
+        List<CommentMentionEntity> commentMentionEntities = newMentions.stream()
+                .filter(mention -> !currentMentions.contains(mention))
+                .map(mention -> new CommentMentionEntity(commentId, mention))
+                .toList();
+
+        commentMentionRepository.deleteAllByMentionUserIdIn(mentionIdsToDelete);
+        commentMentionRepository.saveAll(commentMentionEntities);
     }
 }

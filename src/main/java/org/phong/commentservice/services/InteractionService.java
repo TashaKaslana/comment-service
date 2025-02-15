@@ -7,6 +7,9 @@ import org.phong.commentservice.infrastructure.persistence.models.InteractionEnt
 import org.phong.commentservice.infrastructure.persistence.repositories.InteractionRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.UUID;
+
 @Service
 public class InteractionService {
     private final CommentService commentService;
@@ -40,6 +43,14 @@ public class InteractionService {
                 interactionDeleleRequest.interactorId(),
                 interactionDeleleRequest.commentId()
         );
+    }
+
+    public void deleteAllInteractionsByCommentId(UUID commentId) {
+        interactionRepository.deleteAllByCommentId(commentId);
+    }
+
+    public void deleteAllInteractionsByCommentIdList(List<UUID> commentIds) {
+        interactionRepository.deleteAllById(commentIds);
     }
 
     public void updateInteraction(InteractionCreateRequest updateRequest) {

@@ -8,6 +8,7 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+// consider to using dynamic binding by loops
 @Configuration
 public class RabbitMQConfig {
     private static final String QUEUE_NAME = "comment_queue";
@@ -29,6 +30,21 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue commentInternalQueue() {
+        return new Queue("comment_internal_queue", true);
+    }
+
+    @Bean
+    public Queue commentInteractionQueue() {
+        return new Queue("comment_interaction_queue", true);
+    }
+
+    @Bean
+    public Queue commentMentionQueue() {
+        return new Queue("comment_mention_queue", true);
+    }
+
+    @Bean
     public TopicExchange commentExchange() {
         return new TopicExchange(EXCHANGE_NAME);
     }
@@ -36,5 +52,20 @@ public class RabbitMQConfig {
     @Bean
     public Binding bindComment(Queue commentQueue, TopicExchange commentExchange) {
         return BindingBuilder.bind(commentQueue).to(commentExchange).with("comment.#");
+    }
+
+    @Bean
+    public Binding bindCommentInternalQueue(Queue commentInternalQueue, TopicExchange commentExchange) {
+        return BindingBuilder.bind(commentInternalQueue).to(commentExchange).with("internal.comment.*");
+    }
+
+    @Bean
+    public Binding mentionBinding(Queue commentMentionQueue, TopicExchange commentExchange) {
+        return BindingBuilder.bind(commentMentionQueue).to(commentExchange).with("mention.#");
+    }
+
+    @Bean
+    public Binding interactionBinding(Queue commentInteractionQueue, TopicExchange commentExchange) {
+        return BindingBuilder.bind(commentInteractionQueue).to(commentExchange).with("interaction.#");
     }
 }

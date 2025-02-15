@@ -10,4 +10,6 @@ public interface InteractionRepository extends JpaRepository<InteractionEntity, 
     void deleteByInteractorIdAndCommentIdAllIgnoreCase(UUID interactorId, UUID commentId);
 
     InteractionEntity findInteractionEntityByInteractorIdAndCommentIdAllIgnoreCase(@NotNull UUID interactorId, @NotNull UUID commentId);
+
+    void deleteAllByCommentId(UUID commentId);
 }
