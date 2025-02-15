@@ -30,11 +30,6 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Queue commentInternalQueue() {
-        return new Queue("comment_internal_queue", true);
-    }
-
-    @Bean
     public Queue commentInteractionQueue() {
         return new Queue("comment_interaction_queue", true);
     }
@@ -52,11 +47,6 @@ public class RabbitMQConfig {
     @Bean
     public Binding bindComment(Queue commentQueue, TopicExchange commentExchange) {
         return BindingBuilder.bind(commentQueue).to(commentExchange).with("comment.#");
-    }
-
-    @Bean
-    public Binding bindCommentInternalQueue(Queue commentInternalQueue, TopicExchange commentExchange) {
-        return BindingBuilder.bind(commentInternalQueue).to(commentExchange).with("internal.comment.*");
     }
 
     @Bean

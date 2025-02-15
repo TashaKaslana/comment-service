@@ -1,17 +1,8 @@
 package org.phong.commentservice.infrastructure.persistence.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+
+import lombok.*;
 
 import java.util.UUID;
 
@@ -24,12 +15,12 @@ import java.util.UUID;
 @Builder
 public class InteractionEntity extends BaseEntity {
     @Id
-    @Column(name = "comment_id", nullable = false, updatable = false)
-    private UUID commentId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", nullable = false, updatable = false)
+    private UUID id;
 
     @ManyToOne
-    @MapsId
-    @JoinColumn(name = "comment_id", referencedColumnName = "id", nullable = false, updatable = false)
+    @JoinColumn(name = "comment_id", nullable = false)
     private CommentEntity comment;
 
     @Column(name = "interactor_id", nullable = false)
@@ -38,4 +29,3 @@ public class InteractionEntity extends BaseEntity {
     @Column(name = "interaction_type", nullable = false)
     private String interactionType;
 }
-

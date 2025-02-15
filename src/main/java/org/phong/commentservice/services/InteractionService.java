@@ -3,6 +3,7 @@ package org.phong.commentservice.services;
 import org.phong.commentservice.dtos.requests.InteractionCreateRequest;
 import org.phong.commentservice.dtos.requests.InteractionDeleleRequest;
 import org.phong.commentservice.infrastructure.mapstructs.InteractionEntityMapper;
+import org.phong.commentservice.infrastructure.persistence.models.CommentEntity;
 import org.phong.commentservice.infrastructure.persistence.models.InteractionEntity;
 import org.phong.commentservice.infrastructure.persistence.repositories.InteractionRepository;
 import org.springframework.stereotype.Service;
@@ -25,10 +26,10 @@ public class InteractionService {
     }
 
     public void createInteraction(InteractionCreateRequest createRequest) {
-        commentService.findById(createRequest.commentId());
+        CommentEntity comment = commentService.findById(createRequest.commentId());
 
         InteractionEntity interactionEntity = InteractionEntity.builder()
-                .commentId(createRequest.commentId())
+                .comment(comment)
                 .interactorId(createRequest.interactorId())
                 .interactionType(createRequest.interactionType())
                 .build();

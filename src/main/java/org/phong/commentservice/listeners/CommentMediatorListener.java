@@ -5,12 +5,12 @@ import org.phong.commentservice.events.producers.CommentCreatedEvent;
 import org.phong.commentservice.events.producers.CommentDeletedEvent;
 import org.phong.commentservice.events.producers.CommentsOfPostDeletedEvent;
 import org.phong.commentservice.infrastructure.rabbitmq.RabbitMQPublisher;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
-@RabbitListener(queues = "comment_internal_queue")
 public class CommentMediatorListener {
     private final RabbitMQPublisher rabbitMQPublisher;
 
@@ -18,23 +18,27 @@ public class CommentMediatorListener {
         this.rabbitMQPublisher = rabbitMQPublisher;
     }
 
-    @RabbitHandler
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCommentDeleted(CommentDeletedEvent event) {
         rabbitMQPublisher.sendMessage("mention.deleted", event);
         rabbitMQPublisher.sendMessage("interaction.deleted", event);
     }
 
-    @RabbitHandler
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCommentCreated(CommentCreatedEvent event) {
         rabbitMQPublisher.sendMessage("mention.created", event);
     }
 
-    @RabbitHandler
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCommentContentUpdated(CommentContentUpdatedEvent event) {
         rabbitMQPublisher.sendMessage("mention.updated", event);
     }
 
-    @RabbitHandler
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCommentsOfPostDeleted(CommentsOfPostDeletedEvent event) {
         rabbitMQPublisher.sendMessage("mention.deleted", event);
         rabbitMQPublisher.sendMessage("interaction.deleted", event);

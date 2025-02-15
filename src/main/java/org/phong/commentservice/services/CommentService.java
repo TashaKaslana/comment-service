@@ -14,6 +14,7 @@ import org.phong.commentservice.infrastructure.mapstructs.CommentEntityMapper;
 import org.phong.commentservice.infrastructure.persistence.models.CommentEntity;
 import org.phong.commentservice.infrastructure.persistence.repositories.CommentRepository;
 import org.phong.commentservice.infrastructure.rabbitmq.RabbitMQPublisher;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,12 +26,14 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentEntityMapper commentEntityMapper;
     private final RabbitMQPublisher rabbitMQPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     public CommentService(CommentRepository commentRepository,
-                          CommentEntityMapper commentEntityMapper, RabbitMQPublisher rabbitMQPublisher) {
+                          CommentEntityMapper commentEntityMapper, RabbitMQPublisher rabbitMQPublisher, ApplicationEventPublisher eventPublisher) {
         this.commentRepository = commentRepository;
         this.commentEntityMapper = commentEntityMapper;
         this.rabbitMQPublisher = rabbitMQPublisher;
+        this.eventPublisher = eventPublisher;
     }
 
     public CommentEntityDto getComment(UUID id) {
@@ -47,12 +50,13 @@ public class CommentService {
                 .toList();
     }
 
+    @Transactional
     public CommentCreatedRespond createComment(CommentCreateRequest commentCreateRequest) {
         CommentEntity commentEntity = commentEntityMapper.toEntity(commentCreateRequest);
 
         CommentEntity commentCreatedEntity = commentRepository.save(commentEntity);
 
-        rabbitMQPublisher.sendMessage("internal.comment.created", new CommentCreatedEvent(
+        eventPublisher.publishEvent(new CommentCreatedEvent(
                 commentCreatedEntity.getId(),
                 commentCreatedEntity.getPostId(),
                 commentCreatedEntity.getContent()
@@ -72,14 +76,16 @@ public class CommentService {
 
         commentRepository.deleteAllByPostId(postId);
 
-        rabbitMQPublisher.sendMessage("internal.comment.deleted",
-                new CommentsOfPostDeletedEvent(commentIdsToDelete)
-        );
+        eventPublisher.publishEvent(new CommentsOfPostDeletedEvent(commentIdsToDelete));
     }
 
     public CommentEntity findById(UUID commentId) {
         return commentRepository.findById(commentId).
                 orElseThrow(() -> new CommentNotFoundException(BusinessErrorEnums.COMMENT_NOT_FOUND.getMessage()));
+    }
+
+    public CommentEntity getReferenceById(UUID commentId) {
+        return commentRepository.getReferenceById(commentId);
     }
 
     @Transactional
@@ -88,7 +94,8 @@ public class CommentService {
 
         commentEntity.setContent(commentContentUpdateRequest.content());
 
-        rabbitMQPublisher.sendMessage("internal.comment.updated", new CommentContentUpdatedEvent(
+        eventPublisher.publishEvent(
+                new CommentContentUpdatedEvent(
                         commentId,
                         commentContentUpdateRequest.content()
                 )

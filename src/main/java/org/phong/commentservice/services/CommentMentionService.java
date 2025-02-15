@@ -1,6 +1,7 @@
 package org.phong.commentservice.services;
 
 import jakarta.validation.constraints.NotNull;
+import org.phong.commentservice.infrastructure.persistence.models.CommentEntity;
 import org.phong.commentservice.infrastructure.persistence.models.CommentMentionEntity;
 import org.phong.commentservice.infrastructure.persistence.repositories.CommentMentionRepository;
 import org.springframework.stereotype.Service;
@@ -35,12 +36,12 @@ public class CommentMentionService {
     }
 
     public void createMentions(UUID commentId, @NotNull String commentText) {
-        commentService.findById(commentId);
+        CommentEntity comment = commentService.findById(commentId);
 
         List<String> userMentions = extractMentions(commentText);
 
         List<CommentMentionEntity> entityList = userMentions.stream()
-                .map(mentionUsername -> new CommentMentionEntity(commentId, mentionUsername))
+                .map(mentionUsername -> new CommentMentionEntity(comment, mentionUsername))
                 .toList();
 
         commentMentionRepository.saveAll(entityList);
@@ -51,7 +52,7 @@ public class CommentMentionService {
     }
 
     public void updateMentions(UUID commentId, String content) {
-        List<String> currentMentions = commentMentionRepository.findAllByCommentId(commentId);
+        List<String> currentMentions = commentMentionRepository.findMentionUserIdsByCommentId(commentId);
         List<String> newMentions = extractMentions(content);
 
         List<String> mentionIdsToDelete = currentMentions.stream()
@@ -60,10 +61,13 @@ public class CommentMentionService {
 
         List<CommentMentionEntity> commentMentionEntities = newMentions.stream()
                 .filter(mention -> !currentMentions.contains(mention))
-                .map(mention -> new CommentMentionEntity(commentId, mention))
+                .map(mention -> {
+                    CommentEntity comment = commentService.getReferenceById(commentId);
+                    return new CommentMentionEntity(comment, mention);
+                })
                 .toList();
 
-        commentMentionRepository.deleteAllByMentionUserIdIn(mentionIdsToDelete);
+        commentMentionRepository.deleteByMentionUserIds(mentionIdsToDelete);
         commentMentionRepository.saveAll(commentMentionEntities);
     }
 }
