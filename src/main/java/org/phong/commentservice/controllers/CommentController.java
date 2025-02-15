@@ -1,5 +1,6 @@
 package org.phong.commentservice.controllers;
 
+import jakarta.validation.Valid;
 import org.phong.commentservice.dtos.requests.CommentContentUpdateRequest;
 import org.phong.commentservice.dtos.requests.CommentCreateRequest;
 import org.phong.commentservice.dtos.responds.CommentCreatedRespond;
@@ -35,7 +36,7 @@ public class CommentController {
     }
 
     @PostMapping
-    public ResponseEntity<CommentCreatedRespond> createComment(@RequestBody CommentCreateRequest commentCreateRequest) {
+    public ResponseEntity<CommentCreatedRespond> createComment(@Valid @RequestBody CommentCreateRequest commentCreateRequest) {
         CommentCreatedRespond createdComment = commentService.createComment(commentCreateRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdComment);
     }
@@ -53,7 +54,7 @@ public class CommentController {
     }
 
     @PutMapping("/{id}/content")
-    public ResponseEntity<Void> updateCommentContent(@PathVariable UUID id, @RequestBody CommentContentUpdateRequest commentContentUpdateRequest) {
+    public ResponseEntity<Void> updateCommentContent(@PathVariable UUID id, @Valid @RequestBody CommentContentUpdateRequest commentContentUpdateRequest) {
         commentService.updateCommentContent(id, commentContentUpdateRequest);
         return ResponseEntity.noContent().build();
     }

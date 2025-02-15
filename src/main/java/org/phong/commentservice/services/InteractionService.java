@@ -2,6 +2,8 @@ package org.phong.commentservice.services;
 
 import org.phong.commentservice.dtos.requests.InteractionCreateRequest;
 import org.phong.commentservice.dtos.requests.InteractionDeleleRequest;
+import org.phong.commentservice.dtos.requests.InteractionUpdateRequest;
+import org.phong.commentservice.dtos.responds.RelevantInteractionRespond;
 import org.phong.commentservice.infrastructure.mapstructs.InteractionEntityMapper;
 import org.phong.commentservice.infrastructure.persistence.models.CommentEntity;
 import org.phong.commentservice.infrastructure.persistence.models.InteractionEntity;
@@ -25,8 +27,18 @@ public class InteractionService {
         this.interactionEntityMapper = interactionEntityMapper;
     }
 
-    public void createInteraction(InteractionCreateRequest createRequest) {
-        CommentEntity comment = commentService.findById(createRequest.commentId());
+    public List<RelevantInteractionRespond> getInteractionOfCommentId(UUID commentId) {
+        CommentEntity comment = commentService.findById(commentId);
+
+        List<InteractionEntity> interactions = interactionRepository.findAllByComment(comment);
+
+        return interactions.stream()
+                .map(interactionEntityMapper::toDto2)
+                .toList();
+    }
+
+    public void createInteraction(UUID commentId, InteractionCreateRequest createRequest) {
+        CommentEntity comment = commentService.findById(commentId);
 
         InteractionEntity interactionEntity = InteractionEntity.builder()
                 .comment(comment)
@@ -54,12 +66,12 @@ public class InteractionService {
         interactionRepository.deleteAllById(commentIds);
     }
 
-    public void updateInteraction(InteractionCreateRequest updateRequest) {
-        commentService.findById(updateRequest.commentId());
+    public void updateInteraction(UUID commentId, UUID interactorId, InteractionUpdateRequest updateRequest) {
+        commentService.findById(commentId);
 
         InteractionEntity interactionEntity = interactionRepository.findInteractionEntityByInteractorIdAndCommentIdAllIgnoreCase(
-                updateRequest.interactorId(),
-                updateRequest.commentId()
+                interactorId,
+                commentId
         );
 
         interactionEntity.setInteractionType(updateRequest.interactionType());

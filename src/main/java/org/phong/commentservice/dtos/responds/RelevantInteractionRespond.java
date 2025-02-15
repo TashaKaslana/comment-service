@@ -1,18 +1,18 @@
-package org.phong.commentservice.dtos.requests;
+package org.phong.commentservice.dtos.responds;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
  * DTO for {@link org.phong.commentservice.infrastructure.persistence.models.InteractionEntity}
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record InteractionCreateRequest(@NotNull UUID interactorId,
-                                       @NotNull @Size(max = 32) @NotEmpty @NotBlank String interactionType) implements Serializable {
+public record RelevantInteractionRespond(LocalDateTime createdAt, LocalDateTime updatedAt, @NotNull UUID interactorId,
+                                         @NotNull @NotEmpty @NotBlank String interactionType) implements Serializable {
 }

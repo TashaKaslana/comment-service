@@ -8,6 +8,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 import org.phong.commentservice.dtos.requests.InteractionCreateRequest;
 import org.phong.commentservice.dtos.requests.InteractionDeleleRequest;
+import org.phong.commentservice.dtos.responds.RelevantInteractionRespond;
 import org.phong.commentservice.infrastructure.persistence.models.InteractionEntity;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
@@ -25,4 +26,11 @@ public interface InteractionEntityMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     InteractionEntity partialUpdate(InteractionDeleleRequest interactionDeleleRequest, @MappingTarget InteractionEntity interactionEntity);
+
+    InteractionEntity toEntity(RelevantInteractionRespond relevantInteractionRespond);
+
+    RelevantInteractionRespond toDto2(InteractionEntity interactionEntity);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    InteractionEntity partialUpdate(RelevantInteractionRespond relevantInteractionRespond, @MappingTarget InteractionEntity interactionEntity);
 }

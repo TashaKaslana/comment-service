@@ -38,11 +38,8 @@ public class InteractionEventListener {
     @RabbitHandler
     public void handleInteractEvent(CommentInteractedEvent event) {
         interactionService.createInteraction(
-                new InteractionCreateRequest(
-                        event.commentId(),
-                        event.userId(),
-                        event.interactionType()
-                )
+                event.commentId(),
+                new InteractionCreateRequest(event.userId(), event.interactionType())
         );
     }
 }
